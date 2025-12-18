@@ -49,11 +49,50 @@ The fifth sprint transitioned from planning to active code development. Key deli
 
 The r8169_rs repository contains the initial Rust implementation of core driver functionality. The linuxdrivers repository provides the development environment framework supporting the implementation process. Initial modules implemented fundamental driver operations while maintaining compatibility with the existing kernel infrastructure through carefully designed Foreign Function Interface (FFI) bindings.
 
-### Sprint 6: TODO!
-### Sprint 7: TODO!
-### Sprint 8: TODO!
-### Sprint 9: TODO!
-### Sprint 10: TODO!
+### Sprint 6: Implementation Phase 3/8
+
+**Duration:** October 13-24, 2025
+
+Efforts focused on extracting and reimplementing security-critical subsystems in Rust. Particular attention was given to the firmware handling logic in the original C driver—a complex and historically vulnerable section involving binary blob parsing, checksum validation, and register programming.
+
+A major refactoring resulted in a modular Rust firmware subsystem featuring safe parsing through bounds-checked operations, explicit error handling, and macro-generated enums for opcodes and chip versions. New source files (`firmware.rs`, `macros.rs`) were introduced, eliminating scattered hardcoded data from the prior monolithic structure.
+
+Patterns derived from the public `rustsp_oct25_demos` repository were adopted to ensure idiomatic and safe Rust kernel code, including minimized unsafe blocks and robust casting helpers. The sprint concluded with successful compilation of a hybrid module integrating the new Rust firmware components with the unmodified C driver core.
+
+### Sprint 7: Implementation Phase 4/8
+
+**Duration:** October 27 - November 7, 2025
+
+The firmware handling logic was fully decoupled into an independent, reusable Rust crate named `r8169_firmware`. All related functionality was migrated to a dedicated directory structure.
+
+The module was redesigned to expose a stable C-callable ABI through a custom procedural macro (`define_rtl_c_fn!`) that generated `#[no_mangle]` extern "C" wrappers. Closure-based designs were replaced with function-pointer callbacks for complete FFI compatibility, while explicit resource management using `Option<T>` and dedicated release functions ensured correctness in no-alloc kernel contexts.
+
+Build verification demonstrated seamless integration: the modified original `r8169.c` successfully linked against the Rust firmware module, yielding a functional hybrid `r8169.ko` with all required `rtl_fw_*` symbols correctly exported on x86_64 and aarch64 architectures.
+
+### Sprint 8: Implementation Phase 5/8
+
+**Duration:** November 10-21, 2025
+
+Further refinement of the Rust firmware subsystem emphasized enhanced safety and maintainability. Improvements included stricter bounds checking based on parsed action sizes, consistent error propagation using POSIX codes, and device-aware logging via kernel macros.
+
+The primary driver codebase was streamlined by removing redundant firmware logic from the C portion, resulting in a more focused core responsible solely for PCI probing, interrupt management, and MAC/PHY operations. Independent compilation of the firmware crate was validated, facilitating parallel development.
+
+### Sprint 9: Implementation Phase 6/8
+
+**Duration:** November 24 - December 5, 2025
+
+Functional validation of the refactored hybrid driver was prioritized. Extensive QEMU-based testing in a minimal Debian environment successfully exercised the complete firmware request → parse → write sequence within the Rust subsystem.
+
+Detailed `dmesg` traces verified proper header validation, checksum computation, and action iteration through FFI callbacks.
+
+Initial bare-metal deployment attempts revealed environment-specific challenges but provided indirect confirmation of build integrity. The Rust firmware module introduced no additional instability while delivering measurable improvements in memory safety compared to the original C implementation.
+
+### Sprint 10: Implementation Phase 7/8
+
+**Duration:** December 8-19, 2025
+
+Enhanced tracing mechanisms have been implemented to capture Rust firmware execution paths upon successful probing. Planning advances for porting the `r8169_firmware` module to the related r8169 driver, demonstrating cross-family reusability.
+
 ### Sprint 11: TODO!
 ### Sprint 12: TODO!
 ### Sprint 13: TODO!
