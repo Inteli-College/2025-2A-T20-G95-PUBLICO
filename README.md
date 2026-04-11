@@ -93,11 +93,46 @@ Initial bare-metal deployment attempts revealed environment-specific challenges 
 
 Enhanced tracing mechanisms have been implemented to capture Rust firmware execution paths upon successful probing. Planning advances for porting the `r8169_firmware` module to the related r8169 driver, demonstrating cross-family reusability.
 
-### Sprint 11: TODO!
-### Sprint 12: TODO!
-### Sprint 13: TODO!
-### Sprint 14: TODO!
-### Sprint 15: TODO!
+### Sprint 11: Contingency Activation - Plan B Pivot
+
+**Duration:** February 9-20, 2026
+
+r8169 hybrid bare-metal probe-time panics persisted despite workarounds (r8169.aspm=0, pcie_aspm=off). Activated Plan B per contingency milestone: pivoted to upstream nullblk.c vs rnull.rs comparison, eliminating hardware variables.
+
+Archived r8169 firmware crate as integration case study. Built parallel Linux 6.18.y kernels (Kernel A: CONFIG_NULL_BLK=y; Kernel B: CONFIG_RUST=y, CONFIG_RNULL=m) with KASAN.
+
+### Sprint 12: Environment Setup & Static Analysis
+
+**Duration:** February 23 - March 6, 2026
+
+Verified both kernels boot cleanly on QEMU/bare-metal. modprobe nullblk/rnull created /dev/nullb* devices correctly. Static analysis: nullblk.c (1,450 LoC, 41% safety fixes historically); rnull.rs (1,100-1,300 LoC, 0 unsafe in core).
+
+Initial fio smoke tests (4k bs, QD=8) comparable IOPS. Generated CSV metrics (LoC, unsafe density).
+
+### Sprint 13: fio Benchmark Matrix
+
+**Duration:** March 9-20, 2026
+
+Executed fio matrix (216 configs, 50 runs/driver): rnull 25-30% IOPS deficit vs nullblk (peaks 4k randrw, shrinks 1M seq). Queue-depth invariant (falsifies H3). Tail latencies nullblk p95/99 lower by 3-15μs.
+
+KASAN stress (200 device cycles + fio) clean. Automated QEMU tooling with idempotent testing.
+
+### Sprint 14: Infrastructure Hardening
+
+**Duration:** March 6-19, 2026
+
+Hardened test env for syzkaller: SSH-dropbear (replaces telnet), guest networking (10.0.2.15/24), BusyBox PKGBUILD, syzkaller Docker build. Hypothesis status: H2/H3 falsified (25-30% overhead constant); H1 pending.
+
+Sprint slippage: infrastructure focus deferred fuzzing/static analysis.
+
+### Sprint 15: Initial Syzkaller & Synthesis
+
+**Duration:** March 20 - April 10, 2026
+
+Executed syzkaller campaigns: no block-driver bugs (crashes scheduler/RPC noise only)—H1 inconclusive. Synthesized: Rust imposes 25% perf cost, no observed dynamic safety gain in mature drivers.
+
+Next: extend fuzzing (48-72h), static/commit mining.
+
 ### Sprint 16: TODO!
 ### Sprint 17: TODO!
 ### Sprint 18: TODO!
