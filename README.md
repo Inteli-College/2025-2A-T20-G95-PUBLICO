@@ -133,8 +133,40 @@ Executed syzkaller campaigns: no block-driver bugs (crashes scheduler/RPC noise 
 
 Next: extend fuzzing (48-72h), static/commit mining.
 
-### Sprint 16: TODO!
-### Sprint 17: TODO!
-### Sprint 18: TODO!
-### Sprint 19: TODO!
-### Sprint 20: TODO!
+### Sprint 16: Static Analysis & Evidence-Gated Pipeline Design
+
+**Duration:** April 13-24, 2026
+
+Completed the deferred static and commit-history analysis. The `null_blk.c` commit log (2020–2025) was mined and CWE-classified: 69 of 106 commits carry a safety signal (65%), mapped against the ACSAC R4L taxonomy (auto-eliminated / needs-discipline / language-unaffected). `rnull.rs` confirmed zero unsafe blocks in core driver logic, with all `unsafe` confined to C API wrappers.
+
+The evidence-gated pipeline was designed: a three-gate framework (safety, fuzzing, performance) plus a Phase 1 candidate screening step that scores drivers across four lenses (historical risk, static unsafe surface, dynamic robustness, tractability). Pipeline scripts were written and integrated with the nullb automation toolchain, decoupling performance preparation from benchmark execution.
+
+### Sprint 17: Extended Fuzzing & Paper Planning
+
+**Duration:** April 27 - May 8, 2026
+
+Executed ten 24-hour syzkaller campaigns per driver with crash attribution filtering to isolate target-attributable failures from SSH/RPC harness noise. Result: Mann-Whitney U p=0.37, Vargha-Delaney A₁₂=0.45—no block-driver regression attributable to rnull (fuzzing gate passes under do-no-harm framing). Monte Carlo power simulation added to verify that the campaign length was adequate for detecting large effects.
+
+Final performance results locked: all 18 matched fio cells regress for rnull (median −14.4%, worst −25.5%), with every cell surviving Holm correction. The paper plan was drafted, establishing the research contribution as the pipeline structure rather than a simple pass/fail verdict on rnull.
+
+### Sprint 18: Results Synthesis & Research Paper Draft
+
+**Duration:** May 11-22, 2026
+
+Synthesized the full evidence profile for the null_blk/rnull pair: safety gate did not pass (elimination rate 18.18% < 34.2% threshold, driven by CWE-362-family races and logic errors outside Rust's scope); fuzzing gate passed; performance gate did not pass. The three-gate disagreement was framed as the primary scientific contribution—the signal an R4L upstreaming discussion should want.
+
+Drafted the research paper targeting an academic venue. Figures generated reproducibly from canonical result artifacts; numeric claims verified by automated script.
+
+### Sprint 19: Paper Finalization & Submission
+
+**Duration:** May 25 - June 5, 2026
+
+Iterated through final paper revisions: double-blind anonymization, rewording toward storage-systems framing, RFC-status clarification for rnull, and PDF metadata stripping. All five pages of the camera-ready submission verified against the formatting checklist.
+
+Research paper finalized. The pipeline, result artifacts (safety.json, fuzz_stats.json, perf_stats.json, verdict.json, perf.csv, fuzz.csv), and reproducible build environment (Nix flake + LaTeX Makefile) constitute the final research deliverable.
+
+### Sprint 20: Final Presentation & Project Closure
+
+**Duration:** June 8-19, 2026
+
+Final academic deliverables and project retrospective.
